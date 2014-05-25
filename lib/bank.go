@@ -8,10 +8,6 @@ import (
     _ "github.com/go-sql-driver/mysql"
 )
 
-var (
-    transactions = make([]*Transaction, 0)
-)
-
 type Transaction struct {
     Amount int
     Date *time.Time
@@ -26,8 +22,8 @@ func (t *Transaction) JSON() string {
     return string(j)
 }
 
-func NewTransaction(amount int) *Transaction {
-    transactionDate := time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC)
+func NewTransaction(amount int, transactionDate time.Time) *Transaction {
+    //transactionDate := time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC)
     return &Transaction{amount, &transactionDate}
 }
 
@@ -49,10 +45,14 @@ func LoadTransaction(id int) *Transaction {
     defer stmt.Close()
 
     var amount int
-    var time string
-    stmt.QueryRow(id).Scan(&amount, &time)
-    fmt.Println(fmt.Sprintf("amount:%d time:%s", amount, time))
+    var transactionDate string
+    rowNotFound := stmt.QueryRow(id).Scan(&amount, &transactionDate)
+    if rowNotFound != nil {
+        return nil
+    }
 
-    trans := append(transactions, NewTransaction(105))
-    return trans[0]
+    fmt.Println(fmt.Sprintf("amount:%d time:%s", amount, transactionDate))
+
+    parsedTime, err := time.Parse("2006-01-02", transactionDate)
+    return NewTransaction(amount, parsedTime)
 }
