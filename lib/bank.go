@@ -58,6 +58,43 @@ func LoadTransaction(id int) *Transaction {
 	return trans
 }
 
+// Load multiple transactions
+//TODO: left off here
+func LoadTransactions() []*Transaction {
+    db, err := sql.Open("mysql", "root@/bank")
+	if err != nil {
+		fmt.Println("Error connecting to MySQL")
+		fmt.Println(err)
+		return nil
+	}
+	defer db.Close()
+
+    rows, err := db.Query("SELECT id, amount, time FROM Transaction")
+    if err != nil {
+        fmt.Println("Error retrieving transactions")
+        fmt.Println(err)
+    }
+    defer rows.Close()
+
+    var id, amount int
+    var transactionDate string
+
+    for rows.Next() {
+        err := rows.Scan(&id, &amount, &transactionDate)
+        if err != nil {
+            fmt.Println("Failed to scan")
+            fmt.Println(err)
+            parsedTime, _ := time.Parse("2006-01-02", transactionDate)
+            
+            trans := NewTransaction(amount, parsedTime)
+            trans.Id = id
+        }
+    }
+
+    result := make([]*Transaction, 0)
+    return result
+}
+
 // Persist a transaction
 func (t *Transaction) Save() {
 	db, err := sql.Open("mysql", "root@/bank")
