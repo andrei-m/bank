@@ -1,0 +1,9 @@
+CREATE DATABASE bank;
+USE bank;
+
+CREATE TABLE `Transaction` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `amount` int(11) DEFAULT NULL,
+    `time` date DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8
