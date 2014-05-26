@@ -29,7 +29,7 @@ func NewTransaction(amount int, transactionDate time.Time) *Transaction {
 
 // Instantiate and return a reference to a Transaction from the db
 func LoadTransaction(id int) *Transaction {
-	db, err := sql.Open("mysql", "root@/bank")
+	db, err := sql.Open("mysql", "bank:bank@/bank")
 	if err != nil {
 		fmt.Println("Error connecting to MySQL")
 		fmt.Println(err)
@@ -61,7 +61,7 @@ func LoadTransaction(id int) *Transaction {
 // Load multiple transactions
 //TODO: left off here
 func LoadTransactions() []*Transaction {
-	db, err := sql.Open("mysql", "root@/bank")
+	db, err := sql.Open("mysql", "bank:bank@/bank")
 	if err != nil {
 		fmt.Println("Error connecting to MySQL")
 		fmt.Println(err)
@@ -97,7 +97,7 @@ func LoadTransactions() []*Transaction {
 
 // Persist a transaction
 func (t *Transaction) Save() {
-	db, err := sql.Open("mysql", "root@/bank")
+	db, err := sql.Open("mysql", "bank:bank@/bank")
 	if err != nil {
 		fmt.Println("Error connecting to MySQL")
 		fmt.Println(err)
