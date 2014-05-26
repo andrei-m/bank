@@ -39,7 +39,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 // Handle transaction listing
 func handleTransactions(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-        fmt.Fprintf(w, "[{\"Id\":0,\"Amount\":99,\"Date\":\"2014-05-23T00:00:00Z\"}]")
+		fmt.Fprintf(w, "[{\"Id\":0,\"Amount\":99,\"Date\":\"2014-05-23T00:00:00Z\"}]")
 	} else {
 		w.Header().Set("Allow", "GET")
 		http.Error(w, "Unsupported method", 405)
@@ -51,7 +51,7 @@ func main() {
 	http.HandleFunc("/transaction/", handleTransaction)
 	http.HandleFunc("/transactions", handleTransactions)
 
-    http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static/"))))
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static/"))))
 
 	http.ListenAndServe(":1337", nil)
 }
