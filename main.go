@@ -39,7 +39,13 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 // Handle transaction listing
 func handleTransactions(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		fmt.Fprintf(w, "[{\"Id\":0,\"Amount\":99,\"Date\":\"2014-05-23T00:00:00Z\"}]")
+		transactions := bank.LoadTransactions()
+		j, err := json.Marshal(transactions)
+		if err != nil {
+			http.Error(w, "Failed to JSONify Transactions", 500)
+		} else {
+			fmt.Fprintf(w, string(j))
+		}
 	} else {
 		w.Header().Set("Allow", "GET")
 		http.Error(w, "Unsupported method", 405)

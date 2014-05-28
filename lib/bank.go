@@ -59,7 +59,6 @@ func LoadTransaction(id int) *Transaction {
 }
 
 // Load multiple transactions
-//TODO: left off here
 func LoadTransactions() []*Transaction {
 	db, err := sql.Open("mysql", "bank:bank@/bank")
 	if err != nil {
@@ -78,20 +77,22 @@ func LoadTransactions() []*Transaction {
 
 	var id, amount int
 	var transactionDate string
+	result := make([]*Transaction, 0)
 
 	for rows.Next() {
 		err := rows.Scan(&id, &amount, &transactionDate)
 		if err != nil {
 			fmt.Println("Failed to scan")
 			fmt.Println(err)
+		} else {
 			parsedTime, _ := time.Parse("2006-01-02", transactionDate)
 
 			trans := NewTransaction(amount, parsedTime)
 			trans.Id = id
+			result = append(result, trans)
 		}
 	}
 
-	result := make([]*Transaction, 0)
 	return result
 }
 
