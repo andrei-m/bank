@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var database *sql.DB
+
 type Transaction struct {
 	Id     int
 	Amount int
@@ -29,14 +31,7 @@ func NewTransaction(amount int, transactionDate time.Time) *Transaction {
 
 // Instantiate and return a reference to a Transaction from the db
 func LoadTransaction(id int) *Transaction {
-	db, err := sql.Open("mysql", "bank:bank@/bank")
-	if err != nil {
-		fmt.Println("Error connecting to MySQL")
-		fmt.Println(err)
-		return nil
-	}
-	defer db.Close()
-
+	db := getDB()
 	stmt, err := db.Prepare("SELECT amount, time FROM Transaction WHERE id=?")
 	if err != nil {
 		fmt.Println("Error preparing statement")
@@ -60,14 +55,7 @@ func LoadTransaction(id int) *Transaction {
 
 // Load multiple transactions
 func LoadTransactions() []*Transaction {
-	db, err := sql.Open("mysql", "bank:bank@/bank")
-	if err != nil {
-		fmt.Println("Error connecting to MySQL")
-		fmt.Println(err)
-		return nil
-	}
-	defer db.Close()
-
+	db := getDB()
 	rows, err := db.Query("SELECT id, amount, time FROM Transaction")
 	if err != nil {
 		fmt.Println("Error retrieving transactions")
@@ -98,14 +86,7 @@ func LoadTransactions() []*Transaction {
 
 // Persist a transaction
 func (t *Transaction) Save() {
-	db, err := sql.Open("mysql", "bank:bank@/bank")
-	if err != nil {
-		fmt.Println("Error connecting to MySQL")
-		fmt.Println(err)
-		return
-	}
-	defer db.Close()
-
+	db := getDB()
 	stmt, err := db.Prepare("INSERT INTO Transaction (time, amount) VALUES (?, ?)")
 	if err != nil {
 		fmt.Println("Error preparing statement")
@@ -128,4 +109,17 @@ func (t *Transaction) Save() {
 
 	// Set the lastId on the Transaction
 	t.Id = int(lastId)
+}
+
+func getDB() *sql.DB {
+	if database == nil {
+		db, err := sql.Open("mysql", "bank:bank@/bank")
+		if err != nil {
+			fmt.Println("Error connecting to MySQL")
+			fmt.Println(err)
+		}
+		database = db
+	}
+
+	return database
 }
