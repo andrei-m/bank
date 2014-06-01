@@ -24,7 +24,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 		var transaction bank.Transaction
 		err := decoder.Decode(&transaction)
 		if err != nil {
-			fmt.Println("Bad request body")
+			http.Error(w, "Bad request body", 400)
 			return
 		}
 
