@@ -3,11 +3,17 @@
     <head>
         <title>bank</title>
         <script src="bower_components/angular/angular.min.js"></script>
+        <script src="bower_components/highcharts-release/adapters/standalone-framework.js"></script>
+        <script src="bower_components/highcharts-release/highcharts.js"></script>
+        <script src="bower_components/highcharts-ng/dist/highcharts-ng.min.js"></script>
         <script src="js/controllers.js"></script>
         <script src="js/dateInput.js"></script>
     </head>
     <body>
         <h1>Bank</h1>
+        <div ng-controller="transactionsGraph">
+            <highchart id="graph" config="chartConfig"></highchart>
+        </div>
 
         <h2>Transactions</h2>
         <div ng-controller="transactionsList">

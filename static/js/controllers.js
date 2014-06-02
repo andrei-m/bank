@@ -1,4 +1,4 @@
-var app = angular.module('bank', ['dateInput']);
+var app = angular.module('bank', ['dateInput', 'highcharts-ng']);
 
 app.run(function($rootScope) {
     // Broadcast 'reload' events to controllers that need to hit the backend
@@ -37,5 +37,28 @@ app.controller('transaction', function($scope, $http) {
             $scope.transaction = {};
             $scope.$emit('reload', {'transaction': transaction});
         });
+    };
+});
+
+app.controller('transactionsGraph', function($scope) {
+    $scope.chartConfig = {
+        options: {
+            chart: {
+                type: 'area'
+            }
+        },
+        series: [{
+            'name': 'Credits',
+            'color': '#00B945',
+            data: [10, 15, 12, 8, 7]
+        },
+        {
+            'name': 'Debits',
+            'color': '#FF2C00',
+            data: [1, 2, 3, 4, 5]
+        }],
+        title: {
+            text: null
+        }
     };
 });
