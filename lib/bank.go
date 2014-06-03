@@ -56,7 +56,7 @@ func LoadTransaction(id int) *Transaction {
 // Load multiple transactions
 func LoadTransactions() []*Transaction {
 	db := getDB()
-	rows, err := db.Query("SELECT id, amount, time FROM Transaction")
+	rows, err := db.Query("SELECT id, amount, time FROM Transaction ORDER BY time")
 	if err != nil {
 		fmt.Println("Error retrieving transactions")
 		fmt.Println(err)
