@@ -40,7 +40,8 @@ app.controller('transaction', function($scope, $http) {
     };
 });
 
-app.controller('transactionsGraph', function($scope) {
+app.controller('transactionsGraph', function($scope, transReportFactory) {
+    transReportFactory.foo();
     $scope.chartConfig = {
         options: {
             chart: {
