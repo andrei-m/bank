@@ -1,9 +1,10 @@
 angular.module('bankFilters', [])
-    .filter('utcDate', function() {
-        return function(input) {
+    .filter('utcDate', function($filter) {
+        return function(input, format) {
             var date = new Date(input);
-            var month = date.getUTCMonth() < 10 ? "0" + date.getUTCMonth() : date.getUTCMonth();
-            var day = date.getUTCDate() < 10 ? "0" + date.getUTCDate() : date.getUTCDate();
-            return "" + date.getUTCFullYear() + "-" + month + "-" + day;
+            date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+            // 'date' renders in local time by default. The TZ offset is added
+            // to convert 'local' to 'UTC' before rendering
+            return $filter('date')(date, format);
         }
     });

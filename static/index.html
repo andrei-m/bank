@@ -33,8 +33,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="transaction in transactions | filter:dateFilter">
-                        <!--<td>{{transaction.Date | date: 'yyyy-MM-dd'}}</td> -->
-                        <td>{{transaction.Date | utcDate}}</td>
+                        <td>{{transaction.Date | utcDate: 'yyyy-MM-dd'}}</td>
                         <td>{{transaction.Amount}}</td>
                     </tr>
                 </tbody>
