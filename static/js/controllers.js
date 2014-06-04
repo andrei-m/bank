@@ -66,15 +66,6 @@ app.controller('transaction', function($scope, $http) {
 
 // controller for the transactions graph
 app.controller('transactionsGraph', function($scope, transReportFactory) {
-    $scope.$on('refreshGraphBroadcast', function(event, args) {
-        if (args.transactions) {
-            //TODO: for now, the graph data is just logged
-            console.log(transReportFactory.getReport(args.startDate, 
-                args.endDate, 
-                args.transactions));
-        }
-    });
-
     $scope.chartConfig = {
         options: {
             chart: {
@@ -84,15 +75,36 @@ app.controller('transactionsGraph', function($scope, transReportFactory) {
         series: [{
             'name': 'Credits',
             'color': '#00B945',
-            data: [10, 15, 12, 8, 7]
         },
         {
             'name': 'Debits',
             'color': '#FF2C00',
-            data: [1, 2, 3, 4, 5]
         }],
         title: {
             text: null
         }
     };
+
+    $scope.$on('refreshGraphBroadcast', function(event, args) {
+        if (args.transactions) {
+            var credits = args.transactions.filter(function(trans) {
+                return trans.Amount > 0;
+            });
+            $scope.chartConfig.series[0].data = transReportFactory.getReport(args.startDate, 
+                args.endDate, 
+                credits);
+            console.log(credits);
+            console.log($scope.chartConfig.series[0].data);
+
+            var debits = args.transactions.filter(function(trans) {
+                return trans.Amount < 0;
+            });
+            $scope.chartConfig.series[1].data = transReportFactory.getReport(args.startDate, 
+                args.endDate, 
+                debits);
+            console.log(debits);
+            console.log($scope.chartConfig.series[1].data);
+        }
+    });
+
 });
