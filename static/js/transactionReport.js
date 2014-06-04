@@ -14,7 +14,6 @@ app.factory('transReportFactory', function() {
             var dateIterator = new Date(startDate.getTime());
             var transactionsIter = transactions.slice(0);
 
-            //TODO: off-by-one date error (extra array entry at the head)
             while (dateIterator <= endDate) {
                 while (transactionsIter.length > 0 && this.sameDay(dateIterator, 
                     new Date(transactionsIter[0].Date))) {

@@ -1,4 +1,4 @@
-var app = angular.module('bank', ['dateInput', 'highcharts-ng']);
+var app = angular.module('bank', ['dateInput', 'bankFilters', 'highcharts-ng']);
 
 app.run(function($rootScope) {
     // Broadcast 'reload' events to controllers that need to hit the backend
