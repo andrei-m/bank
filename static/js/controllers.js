@@ -22,18 +22,25 @@ app.controller('transactionsList', function($scope, $http, $filter) {
         return transDate >= $scope.startDate && transDate <= $scope.endDate;
     };
 
-    var emitRefresh = function() {
+    var refresh = function() {
+        var filtered = $filter('filter')($scope.transactions, $scope.dateFilter);
         $scope.$emit('refreshGraph', {
-            'transactions': $filter('filter')($scope.transactions, $scope.dateFilter),
+            'transactions': filtered,
             'startDate': $scope.startDate,
             'endDate': $scope.endDate
         })
+
+        var total = 0;
+        angular.forEach(filtered, function(trans) {
+            total += trans.Amount;
+        });
+        $scope.total = total;
     };
 
     var load = function() {
         $http.get('/transactions').success(function(data) {
             $scope.transactions=data;
-            emitRefresh();
+            refresh();
         });
     };
     load();
@@ -41,10 +48,10 @@ app.controller('transactionsList', function($scope, $http, $filter) {
 
     // Trigger a graph refresh on any start or end date change
     $scope.$watch('startDate', function(newVal, oldVal) {
-        emitRefresh();
+        refresh();
     });
     $scope.$watch('endDate', function(newVal, oldVal) {
-        emitRefresh();
+        refresh();
     });
 });
 

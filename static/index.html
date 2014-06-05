@@ -36,6 +36,7 @@
                         <td>{{transaction.Date | utcDate: 'yyyy-MM-dd'}}</td>
                         <td>{{transaction.Amount | toDecimal}}</td>
                     </tr>
+                    <tr><td></td><td>{{total | toDecimal}}</td></tr>
                 </tbody>
             </table>
         </div>
