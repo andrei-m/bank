@@ -10,6 +10,7 @@
         <script src="js/filters.js"></script>
         <script src="js/dateInput.js"></script>
         <script src="js/transactionReport.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
     </head>
     <body>
         <h1>Bank</h1>
@@ -34,9 +35,9 @@
                 <tbody>
                     <tr ng-repeat="transaction in transactions | filter:dateFilter">
                         <td>{{transaction.Date | utcDate: 'yyyy-MM-dd'}}</td>
-                        <td>{{transaction.Amount | toDecimal}}</td>
+                        <td ng-class="{true: 'credit', false: 'debit'}[transaction.Amount >= 0]">{{transaction.Amount | toDecimal}}</td>
                     </tr>
-                    <tr><td></td><td>{{total | toDecimal}}</td></tr>
+                    <tr><td></td><td ng-class="{true: 'credit', false: 'debit'}[total >= 0]">{{total | toDecimal}}</td></tr>
                 </tbody>
             </table>
         </div>
