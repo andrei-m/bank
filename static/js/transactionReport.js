@@ -7,8 +7,6 @@ app.factory('transReportFactory', function() {
         // and endDate (inclusive). Each element is the sum of transactions that
         // occurred previously
         'getReport': function(startDate, endDate, transactions) {
-            console.log(startDate);
-            console.log(endDate);
             var report = [];
             var sum = 0;
             var dateIterator = new Date(startDate.getTime());

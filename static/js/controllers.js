@@ -49,23 +49,31 @@ app.controller('transactionsList', function($scope, $http, $filter) {
 });
 
 // controller for transaction creation
-app.controller('transaction', function($scope, $http) {
-    $scope.transaction = {};
-    var now = new Date();
-    $scope.transaction.Date = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0);
+app.controller('transaction', function($scope, $http, $filter) {
+    var resetTransaction = function() {
+        $scope.transaction = {};
+        var now = new Date();
+        $scope.transaction.Date = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0);
+    };
+    resetTransaction();
 
     $scope.save = function(transaction) {
-        console.log("POSTing: " + JSON.stringify(transaction));
-        $http.post('/transaction', transaction).success(function(response) {
+        var newTrans = {
+            'Date': transaction.Date,
+            'Amount': $filter('fromDecimal')(transaction.Amount)
+        };
+
+        console.log("POSTing: " + JSON.stringify(newTrans));
+        $http.post('/transaction', newTrans).success(function(response) {
             console.log("POST response: " + JSON.stringify(response));
-            $scope.transaction = {};
-            $scope.$emit('reload', {'transaction': transaction});
+            resetTransaction();
+            $scope.$emit('reload', {'transaction': newTrans});
         });
     };
 });
 
 // controller for the transactions graph
-app.controller('transactionsGraph', function($scope, transReportFactory) {
+app.controller('transactionsGraph', function($scope, $filter, transReportFactory) {
     $scope.chartConfig = {
         options: {
             chart: {
@@ -75,36 +83,47 @@ app.controller('transactionsGraph', function($scope, transReportFactory) {
         series: [{
             'name': 'Credits',
             'color': '#00B945',
+            'pointInterval': 24 * 3600 * 1000
         },
         {
             'name': 'Debits',
             'color': '#FF2C00',
+            'pointInterval': 24 * 3600 * 1000
         }],
         title: {
             text: null
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Dollars'
+            }
         }
     };
 
     $scope.$on('refreshGraphBroadcast', function(event, args) {
         if (args.transactions) {
-            var credits = args.transactions.filter(function(trans) {
+            var credits = $filter('filter')(args.transactions, function(trans) {
                 return trans.Amount > 0;
             });
-            $scope.chartConfig.series[0].data = transReportFactory.getReport(args.startDate, 
+            var creditsReport = transReportFactory.getReport(args.startDate, 
                 args.endDate, 
                 credits);
-            console.log(credits);
-            console.log($scope.chartConfig.series[0].data);
+            $scope.chartConfig.series[0].data = creditsReport.map($filter('toDecimal'));
 
-            var debits = args.transactions.filter(function(trans) {
+            var debits = $filter('filter')(args.transactions, function(trans) {
                 return trans.Amount < 0;
             });
-            $scope.chartConfig.series[1].data = transReportFactory.getReport(args.startDate, 
+            var debitsReport = transReportFactory.getReport(args.startDate, 
                 args.endDate, 
                 debits);
-            console.log(debits);
-            console.log($scope.chartConfig.series[1].data);
+            $scope.chartConfig.series[1].data = debitsReport.map($filter('toDecimal'));
         }
+
+        $scope.chartConfig.series[0].pointStart = args.startDate.getTime();
+        $scope.chartConfig.series[1].pointStart = $scope.chartConfig.series[0].pointStart;
     });
 
 });
