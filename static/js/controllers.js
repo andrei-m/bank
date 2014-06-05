@@ -119,7 +119,11 @@ app.controller('transactionsGraph', function($scope, $filter, transReportFactory
             var debitsReport = transReportFactory.getReport(args.startDate, 
                 args.endDate, 
                 debits);
-            $scope.chartConfig.series[1].data = debitsReport.map($filter('toDecimal'));
+            $scope.chartConfig.series[1].data = debitsReport
+                .map($filter('toDecimal'))
+                .map(function(val) {
+                    return Math.abs(val);
+                });
         }
 
         $scope.chartConfig.series[0].pointStart = args.startDate.getTime();
