@@ -22,3 +22,13 @@ func TestSave(t *testing.T) {
 		t.Errorf("Bad reloaded Id %d != %d", trans.Id, reloaded.Id)
 	}
 }
+
+func TestSaveWithoutDate(t *testing.T) {
+	trans := NewTransaction(99, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC))
+	trans.Date = nil
+	err := trans.Save()
+
+	if err == nil || err.Error() != "bank: cannot save Transaction without a Date" {
+		t.Errorf("Expected an error on Save() without a Date")
+	}
+}

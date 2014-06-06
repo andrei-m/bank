@@ -28,7 +28,12 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		transaction.Save()
+		err = transaction.Save()
+		if err != nil {
+			//TODO: a missing date is a 4xx, the other errors are probably 5xx
+			http.Error(w, err.Error(), 400)
+			return
+		}
 		fmt.Fprintf(w, transaction.JSON())
 	} else {
 		w.Header().Set("Allow", "GET, POST")

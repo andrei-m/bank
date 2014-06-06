@@ -3,6 +3,7 @@ package bank
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
@@ -85,30 +86,31 @@ func LoadTransactions() []*Transaction {
 }
 
 // Persist a transaction
-func (t *Transaction) Save() {
+func (t *Transaction) Save() error {
+	if t.Date == nil {
+		return errors.New("bank: cannot save Transaction without a Date")
+	}
+
 	db := getDB()
 	stmt, err := db.Prepare("INSERT INTO Transaction (time, amount) VALUES (?, ?)")
 	if err != nil {
-		fmt.Println("Error preparing statement")
-		fmt.Println(err)
-		return
+		return errors.New("bank: error preparing statement for Save()")
 	}
 	defer stmt.Close()
 
 	res, err := stmt.Exec(t.Date, t.Amount)
 	if err != nil {
-		fmt.Println("Error executing statement")
-		fmt.Println(err)
+		return errors.New("bank: error executing statement for Save()")
 	}
 
 	lastId, err := res.LastInsertId()
 	if err != nil {
-		fmt.Println("Error retrieving last id")
-		fmt.Println(err)
+		return errors.New("bank: retrieving last id for Save()")
 	}
 
 	// Set the lastId on the Transaction
 	t.Id = int(lastId)
+	return nil
 }
 
 func getDB() *sql.DB {
