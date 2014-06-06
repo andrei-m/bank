@@ -67,7 +67,8 @@ app.controller('transaction', function($scope, $http, $filter) {
     $scope.save = function(transaction) {
         var newTrans = {
             'Date': transaction.Date,
-            'Amount': $filter('fromDecimal')(transaction.Amount)
+            'Amount': $filter('fromDecimal')(transaction.Amount),
+            'Note': transaction.Note
         };
 
         console.log("POSTing: " + JSON.stringify(newTrans));

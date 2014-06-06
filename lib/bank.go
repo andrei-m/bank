@@ -11,10 +11,13 @@ import (
 
 var database *sql.DB
 
+const maxNoteLength = 255
+
 type Transaction struct {
 	Id     int
 	Amount int
 	Date   *time.Time
+	Note   string
 }
 
 func (t *Transaction) JSON() string {
@@ -26,14 +29,14 @@ func (t *Transaction) JSON() string {
 	return string(j)
 }
 
-func NewTransaction(amount int, transactionDate time.Time) *Transaction {
-	return &Transaction{0, amount, &transactionDate}
+func NewTransaction(amount int, transactionDate time.Time, note string) *Transaction {
+	return &Transaction{0, amount, &transactionDate, note}
 }
 
 // Instantiate and return a reference to a Transaction from the db
 func LoadTransaction(id int) *Transaction {
 	db := getDB()
-	stmt, err := db.Prepare("SELECT amount, time FROM Transaction WHERE id=?")
+	stmt, err := db.Prepare("SELECT amount, time, note FROM Transaction WHERE id=?")
 	if err != nil {
 		fmt.Println("Error preparing statement")
 		fmt.Println(err)
@@ -43,13 +46,14 @@ func LoadTransaction(id int) *Transaction {
 
 	var amount int
 	var transactionDate string
-	rowNotFound := stmt.QueryRow(id).Scan(&amount, &transactionDate)
+	var note []byte //nullable
+	rowNotFound := stmt.QueryRow(id).Scan(&amount, &transactionDate, &note)
 	if rowNotFound != nil {
 		return nil
 	}
 
 	parsedTime, err := time.Parse("2006-01-02", transactionDate)
-	trans := NewTransaction(amount, parsedTime)
+	trans := NewTransaction(amount, parsedTime, string(note))
 	trans.Id = id
 	return trans
 }
@@ -57,7 +61,7 @@ func LoadTransaction(id int) *Transaction {
 // Load multiple transactions
 func LoadTransactions() []*Transaction {
 	db := getDB()
-	rows, err := db.Query("SELECT id, amount, time FROM Transaction ORDER BY time")
+	rows, err := db.Query("SELECT id, amount, time, note FROM Transaction ORDER BY time")
 	if err != nil {
 		fmt.Println("Error retrieving transactions")
 		fmt.Println(err)
@@ -66,17 +70,18 @@ func LoadTransactions() []*Transaction {
 
 	var id, amount int
 	var transactionDate string
+	var note []byte //nullable
 	result := make([]*Transaction, 0)
 
 	for rows.Next() {
-		err := rows.Scan(&id, &amount, &transactionDate)
+		err := rows.Scan(&id, &amount, &transactionDate, &note)
 		if err != nil {
 			fmt.Println("Failed to scan")
 			fmt.Println(err)
 		} else {
 			parsedTime, _ := time.Parse("2006-01-02", transactionDate)
 
-			trans := NewTransaction(amount, parsedTime)
+			trans := NewTransaction(amount, parsedTime, string(note))
 			trans.Id = id
 			result = append(result, trans)
 		}
@@ -90,15 +95,18 @@ func (t *Transaction) Save() error {
 	if t.Date == nil {
 		return errors.New("bank: cannot save Transaction without a Date")
 	}
+	if len(t.Note) > maxNoteLength {
+		return errors.New("bank: transaction note is too long to save")
+	}
 
 	db := getDB()
-	stmt, err := db.Prepare("INSERT INTO Transaction (time, amount) VALUES (?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Transaction (time, amount, note) VALUES (?, ?, ?)")
 	if err != nil {
 		return errors.New("bank: error preparing statement for Save()")
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(t.Date, t.Amount)
+	res, err := stmt.Exec(t.Date, t.Amount, t.Note)
 	if err != nil {
 		return errors.New("bank: error executing statement for Save()")
 	}
