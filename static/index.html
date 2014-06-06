@@ -39,7 +39,9 @@
                         <td ng-class="{true: 'credit', false: 'debit'}[transaction.Amount >= 0]">{{transaction.Amount | toDecimal}}</td>
                         <td>{{transaction.Note}}</td>
                     </tr>
-                    <tr><td></td><td ng-class="{true: 'credit', false: 'debit'}[total >= 0]">{{total | toDecimal}}</td></tr>
+                    <tr class="sum">
+                        <td></td>
+                        <td ng-class="{true: 'credit', false: 'debit'}[total >= 0]">{{total | toDecimal}}</td></tr>
                 </tbody>
             </table>
         </div>
