@@ -115,7 +115,14 @@ app.controller('transactionsGraph', function($scope, $filter, transReportFactory
     };
 
     $scope.$on('refreshGraphBroadcast', function(event, args) {
-        if (args.transactions) {
+        // Don't attempt to render the chart for >= 5 years of data
+        var dateDiff = Math.abs(args.startDate.getUTCFullYear() - args.endDate.getUTCFullYear());
+        if (dateDiff >= 5) {
+            $scope.chartConfig.title.text = 'Date range too wide to render';
+            $scope.chartConfig.series[0].data = null;
+            $scope.chartConfig.series[1].data = null;
+        } else if (args.transactions) {
+            $scope.chartConfig.title.text = null;
             var credits = $filter('filter')(args.transactions, function(trans) {
                 return trans.Amount > 0;
             });
