@@ -86,6 +86,9 @@ app.controller('transactionsGraph', function($scope, $filter, transReportFactory
         options: {
             chart: {
                 type: 'area'
+            },
+            tooltip: {
+              pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>${point.y:.2f}</b><br/>'
             }
         },
         series: [{

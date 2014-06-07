@@ -24,3 +24,9 @@ bankFilters.filter('fromDecimal', function() {
         return input * 100;
     }
 });
+// render the decimal to two decimal places with a dollar sign
+bankFilters.filter('currency', function() {
+    return function(input) {
+        return "$" + input.toFixed(2);
+    }
+});
