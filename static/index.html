@@ -38,6 +38,7 @@
                         <td>{{transaction.Date | utcDate: 'yyyy-MM-dd'}}</td>
                         <td ng-class="{true: 'credit', false: 'debit'}[transaction.Amount >= 0]">{{transaction.Amount | toDecimal | currency}}</td>
                         <td>{{transaction.Note}}</td>
+                        <td><a href="#" ng-click="delete(transaction)">Delete</a></td>
                     </tr>
                     <tr class="sum">
                         <td></td>

@@ -53,6 +53,14 @@ app.controller('transactionsList', function($scope, $http, $filter) {
     $scope.$watch('endDate', function(newVal, oldVal) {
         refresh();
     });
+
+    $scope.delete = function(transaction) {
+        console.log('DELETE-ing: ' + JSON.stringify(transaction));
+        $http.delete('/transaction/' + transaction.Id).success(function(response) {
+            console.log('DELETE response: ' + JSON.stringify(response));
+            $scope.$emit('reload');
+        });
+    };
 });
 
 // controller for transaction creation

@@ -36,7 +36,7 @@ func NewTransaction(amount int, transactionDate time.Time, note string) *Transac
 // Instantiate and return a reference to a Transaction from the db
 func LoadTransaction(id int) *Transaction {
 	db := getDB()
-	stmt, err := db.Prepare("SELECT amount, time, note FROM Transaction WHERE id=?")
+	stmt, err := db.Prepare("SELECT amount, time, note FROM Transaction WHERE id=? AND deletionTime IS NULL")
 	if err != nil {
 		fmt.Println("Error preparing statement")
 		fmt.Println(err)
@@ -61,7 +61,7 @@ func LoadTransaction(id int) *Transaction {
 // Load multiple transactions
 func LoadTransactions() []*Transaction {
 	db := getDB()
-	rows, err := db.Query("SELECT id, amount, time, note FROM Transaction ORDER BY time")
+	rows, err := db.Query("SELECT id, amount, time, note FROM Transaction WHERE deletionTime IS NULL ORDER BY time")
 	if err != nil {
 		fmt.Println("Error retrieving transactions")
 		fmt.Println(err)
@@ -118,6 +118,26 @@ func (t *Transaction) Save() error {
 
 	// Set the lastId on the Transaction
 	t.Id = int(lastId)
+	return nil
+}
+
+// Delete a transaction
+func (t *Transaction) Delete() error {
+	if t.Id == 0 {
+		return errors.New("bank: cannot delete a transient Transaction")
+	}
+
+	db := getDB()
+	stmt, err := db.Prepare("UPDATE Transaction SET deletionTime=NOW() where id=?")
+	if err != nil {
+		return errors.New("bank: error preparing statement for Delete()")
+	}
+
+	_, err = stmt.Exec(t.Id)
+	if err != nil {
+		return errors.New("bank: error executing statement for Delete()")
+	}
+
 	return nil
 }
 

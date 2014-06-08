@@ -35,8 +35,23 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprintf(w, transaction.JSON())
+	} else if r.Method == "DELETE" {
+		id, err := strconv.Atoi(r.URL.Path[len("/transaction/"):])
+		if err != nil {
+			http.Error(w, "Bad or missing transaction id in route", 400)
+			return
+		}
+
+		transaction := bank.LoadTransaction(id)
+		err = transaction.Delete()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Failed to delete transaction %d", id), 500)
+			return
+		}
+
+		fmt.Fprintf(w, "Deleted %d", id)
 	} else {
-		w.Header().Set("Allow", "GET, POST")
+		w.Header().Set("Allow", "GET, POST, DELETE")
 		http.Error(w, "Unsupported method", 405)
 	}
 }
