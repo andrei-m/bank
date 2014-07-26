@@ -21,7 +21,7 @@ bankFilters.filter('toDecimal', function() {
 // convert a decimal representation to integer (* 100)
 bankFilters.filter('fromDecimal', function() {
     return function(input) {
-        return input * 100;
+        return Math.round(input * 100);
     }
 });
 // render the decimal to two decimal places with a dollar sign
