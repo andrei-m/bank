@@ -145,11 +145,9 @@ func getDB() *sql.DB {
 	if database == nil {
 		db, err := sql.Open("mysql", "bank:bank@/bank")
 		if err != nil {
-			log.Println("Error connecting to MySQL")
-			log.Println(err)
+			log.Println("sql.Open(): %v", err)
 		}
 		database = db
 	}
-
 	return database
 }
