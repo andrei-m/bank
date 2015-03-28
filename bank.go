@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"log"
 	"time"
 )
 
@@ -23,7 +23,7 @@ type Transaction struct {
 func (t *Transaction) JSON() string {
 	j, err := json.Marshal(t)
 	if err != nil {
-		fmt.Println("Failed to JSONify Transaction")
+		log.Println("json.Marshal(): %v", err)
 		return ""
 	}
 	return string(j)
@@ -38,8 +38,7 @@ func LoadTransaction(id int) *Transaction {
 	db := getDB()
 	stmt, err := db.Prepare("SELECT amount, time, note FROM Transaction WHERE id=? AND deletionTime IS NULL")
 	if err != nil {
-		fmt.Println("Error preparing statement")
-		fmt.Println(err)
+		log.Println("db.Prepare(): %v", err)
 		return nil
 	}
 	defer stmt.Close()
@@ -63,30 +62,31 @@ func LoadTransactions() []*Transaction {
 	db := getDB()
 	rows, err := db.Query("SELECT id, amount, time, note FROM Transaction WHERE deletionTime IS NULL ORDER BY time")
 	if err != nil {
-		fmt.Println("Error retrieving transactions")
-		fmt.Println(err)
+		log.Println("failed to load transactions: %v", err)
+		return nil
 	}
 	defer rows.Close()
 
 	var id, amount int
 	var transactionDate string
 	var note []byte //nullable
-	result := make([]*Transaction, 0)
+	result := []*Transaction{}
 
 	for rows.Next() {
 		err := rows.Scan(&id, &amount, &transactionDate, &note)
 		if err != nil {
-			fmt.Println("Failed to scan")
-			fmt.Println(err)
+			log.Println("Scan(): %v", err)
+			return nil
 		} else {
-			parsedTime, _ := time.Parse("2006-01-02", transactionDate)
-
+			parsedTime, err := time.Parse("2006-01-02", transactionDate)
+			if err != nil {
+				log.Println("time.Parse(): %v", err)
+			}
 			trans := NewTransaction(amount, parsedTime, string(note))
 			trans.Id = id
 			result = append(result, trans)
 		}
 	}
-
 	return result
 }
 
@@ -145,8 +145,8 @@ func getDB() *sql.DB {
 	if database == nil {
 		db, err := sql.Open("mysql", "bank:bank@/bank")
 		if err != nil {
-			fmt.Println("Error connecting to MySQL")
-			fmt.Println(err)
+			log.Println("Error connecting to MySQL")
+			log.Println(err)
 		}
 		database = db
 	}

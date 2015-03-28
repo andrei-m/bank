@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"github.com/andrei-m/bank"
+	"log"
 	"net/http"
 )
 
 func main() {
 	bank.SetupHandlers()
+	log.Println("listening on port 1337")
 	err := http.ListenAndServe(":1337", nil)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(err)
 	}
 }
