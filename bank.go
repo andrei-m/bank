@@ -20,6 +20,7 @@ type Transaction struct {
 	Note   string
 }
 
+//TODO: use encoding/json annotations instead
 func (t *Transaction) JSON() string {
 	j, err := json.Marshal(t)
 	if err != nil {
@@ -89,6 +90,8 @@ func LoadTransactions() []*Transaction {
 	}
 	return result
 }
+
+//TODO: Save app-specific errors as variables; reuse library errors where possible
 
 // Persist a transaction
 func (t *Transaction) Save() error {
