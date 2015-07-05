@@ -6,9 +6,9 @@ import (
 )
 
 func TestSave(t *testing.T) {
-	trans := NewTransaction(1, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), "foo")
+	trans := newTransaction(1, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), "foo")
 	trans.Save()
-	reloaded := LoadTransaction(trans.ID)
+	reloaded := loadTransaction(trans.ID)
 
 	if reloaded.ID != trans.ID {
 		t.Errorf("Bad reloaded Id %d != %d", trans.ID, reloaded.ID)
@@ -16,7 +16,7 @@ func TestSave(t *testing.T) {
 }
 
 func TestSaveWithoutDate(t *testing.T) {
-	trans := NewTransaction(99, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), "foo")
+	trans := newTransaction(99, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), "foo")
 	trans.Date = nil
 	err := trans.Save()
 
@@ -30,7 +30,7 @@ func TestSaveWithLongNote(t *testing.T) {
 	for i := 0; i < 256; i++ {
 		note += "a"
 	}
-	trans := NewTransaction(99, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), note)
+	trans := newTransaction(99, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), note)
 	err := trans.Save()
 
 	if err == nil || err.Error() != "bank: transaction note is too long to save" {

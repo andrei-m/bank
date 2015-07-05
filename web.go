@@ -17,7 +17,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		transaction := LoadTransaction(id)
+		transaction := loadTransaction(id)
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(transaction); err != nil {
 			log.Printf("Encode(%v): %v", transaction, err)
@@ -25,7 +25,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
-		var transaction Transaction
+		var transaction transaction
 		if err := decoder.Decode(&transaction); err != nil {
 			http.Error(w, "Bad request body", 400)
 			return
@@ -48,7 +48,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		transaction := LoadTransaction(id)
+		transaction := loadTransaction(id)
 
 		if err := transaction.Delete(); err != nil {
 			http.Error(w, fmt.Sprintf("Failed to delete transaction %d", id), 500)
@@ -65,7 +65,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 // Handle transaction listing
 func handleTransactions(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		transactions := LoadTransactions()
+		transactions := loadTransactions()
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(transactions); err != nil {
 			log.Printf("Encode(%v): %v", transactions, err)
@@ -77,6 +77,7 @@ func handleTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// SetupHandlers configures routes & handlers for the transaction server
 func SetupHandlers() {
 	http.HandleFunc("/transaction", handleTransaction)
 	http.HandleFunc("/transaction/", handleTransaction)

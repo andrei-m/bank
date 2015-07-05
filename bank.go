@@ -12,15 +12,15 @@ var database *sql.DB
 
 const maxNoteLength = 255
 
-type Transaction struct {
+type transaction struct {
 	ID     int        `json:"id"`
 	Amount int        `json:"amount"`
 	Date   *time.Time `json:"date"`
 	Note   string     `json:"note"`
 }
 
-func NewTransaction(amount int, transactionDate time.Time, note string) *Transaction {
-	return &Transaction{
+func newTransaction(amount int, transactionDate time.Time, note string) *transaction {
+	return &transaction{
 		Amount: amount,
 		Date:   &transactionDate,
 		Note:   note,
@@ -28,7 +28,7 @@ func NewTransaction(amount int, transactionDate time.Time, note string) *Transac
 }
 
 // Instantiate and return a reference to a Transaction from the db
-func LoadTransaction(id int) *Transaction {
+func loadTransaction(id int) *transaction {
 	db := getDB()
 	stmt, err := db.Prepare("SELECT amount, time, note FROM Transaction WHERE id=? AND deletionTime IS NULL")
 	if err != nil {
@@ -50,13 +50,13 @@ func LoadTransaction(id int) *Transaction {
 		log.Printf("failed to parse date %v: %v", transactionDate, err)
 		return nil
 	}
-	trans := NewTransaction(amount, parsedTime, string(note))
+	trans := newTransaction(amount, parsedTime, string(note))
 	trans.ID = id
 	return trans
 }
 
 // Load multiple transactions
-func LoadTransactions() []*Transaction {
+func loadTransactions() []*transaction {
 	db := getDB()
 	rows, err := db.Query("SELECT id, amount, time, note FROM Transaction WHERE deletionTime IS NULL ORDER BY time")
 	if err != nil {
@@ -68,22 +68,21 @@ func LoadTransactions() []*Transaction {
 	var id, amount int
 	var transactionDate string
 	var note []byte //nullable
-	result := []*Transaction{}
+	result := []*transaction{}
 
 	for rows.Next() {
 		err := rows.Scan(&id, &amount, &transactionDate, &note)
 		if err != nil {
 			log.Printf("Scan(): %v\n", err)
 			return nil
-		} else {
-			parsedTime, err := time.Parse("2006-01-02", transactionDate)
-			if err != nil {
-				log.Printf("time.Parse(): %v\n", err)
-			}
-			trans := NewTransaction(amount, parsedTime, string(note))
-			trans.ID = id
-			result = append(result, trans)
 		}
+		parsedTime, err := time.Parse("2006-01-02", transactionDate)
+		if err != nil {
+			log.Printf("time.Parse(): %v\n", err)
+		}
+		trans := newTransaction(amount, parsedTime, string(note))
+		trans.ID = id
+		result = append(result, trans)
 	}
 	return result
 }
@@ -91,7 +90,7 @@ func LoadTransactions() []*Transaction {
 //TODO: Save app-specific errors as variables; reuse library errors where possible
 
 // Persist a transaction
-func (t *Transaction) Save() error {
+func (t *transaction) Save() error {
 	if t.Date == nil {
 		return errors.New("bank: cannot save Transaction without a Date")
 	}
@@ -111,18 +110,18 @@ func (t *Transaction) Save() error {
 		return errors.New("bank: error executing statement for Save()")
 	}
 
-	lastId, err := res.LastInsertId()
+	lastID, err := res.LastInsertId()
 	if err != nil {
 		return errors.New("bank: retrieving last id for Save()")
 	}
 
 	// Set the lastId on the Transaction
-	t.ID = int(lastId)
+	t.ID = int(lastID)
 	return nil
 }
 
 // Delete a transaction
-func (t *Transaction) Delete() error {
+func (t *transaction) Delete() error {
 	if t.ID == 0 {
 		return errors.New("bank: cannot delete a transient Transaction")
 	}
