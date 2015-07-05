@@ -5,14 +5,6 @@ import (
 	"time"
 )
 
-func TestJSON(t *testing.T) {
-	trans := NewTransaction(99, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), "foo")
-	json := trans.JSON()
-	if json != "{\"id\":0,\"amount\":99,\"date\":\"2014-05-23T00:00:00Z\",\"note\":\"foo\"}" {
-		t.Errorf("Bad JSON: %s", json)
-	}
-}
-
 func TestSave(t *testing.T) {
 	trans := NewTransaction(1, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), "foo")
 	trans.Save()

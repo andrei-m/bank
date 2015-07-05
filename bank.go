@@ -2,7 +2,6 @@ package bank
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
@@ -18,16 +17,6 @@ type Transaction struct {
 	Amount int        `json:"amount"`
 	Date   *time.Time `json:"date"`
 	Note   string     `json:"note"`
-}
-
-//TODO: use encoding/json annotations instead
-func (t *Transaction) JSON() string {
-	j, err := json.Marshal(t)
-	if err != nil {
-		log.Println("json.Marshal(): %v", err)
-		return ""
-	}
-	return string(j)
 }
 
 func NewTransaction(amount int, transactionDate time.Time, note string) *Transaction {

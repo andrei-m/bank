@@ -3,6 +3,7 @@ package bank
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -17,23 +18,29 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 		}
 
 		transaction := LoadTransaction(id)
-		fmt.Fprintf(w, transaction.JSON())
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(transaction); err != nil {
+			log.Printf("Encode(%v): %v", transaction, err)
+			http.Error(w, "failed to write transaction response", 500)
+		}
 	} else if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
 		var transaction Transaction
-		err := decoder.Decode(&transaction)
-		if err != nil {
+		if err := decoder.Decode(&transaction); err != nil {
 			http.Error(w, "Bad request body", 400)
 			return
 		}
 
-		err = transaction.Save()
-		if err != nil {
+		if err := transaction.Save(); err != nil {
 			//TODO: a missing date is a 4xx, the other errors are probably 5xx
 			http.Error(w, err.Error(), 400)
 			return
 		}
-		fmt.Fprintf(w, transaction.JSON())
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(transaction); err != nil {
+			log.Printf("Encode(%v): %v", transaction, err)
+			http.Error(w, "failed to write transaction response", 500)
+		}
 	} else if r.Method == "DELETE" {
 		id, err := strconv.Atoi(r.URL.Path[len("/transaction/"):])
 		if err != nil {
@@ -42,8 +49,8 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 		}
 
 		transaction := LoadTransaction(id)
-		err = transaction.Delete()
-		if err != nil {
+
+		if err := transaction.Delete(); err != nil {
 			http.Error(w, fmt.Sprintf("Failed to delete transaction %d", id), 500)
 			return
 		}
@@ -59,11 +66,10 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 func handleTransactions(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		transactions := LoadTransactions()
-		j, err := json.Marshal(transactions)
-		if err != nil {
-			http.Error(w, "Failed to JSONify Transactions", 500)
-		} else {
-			fmt.Fprintf(w, string(j))
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(transactions); err != nil {
+			log.Printf("Encode(%v): %v", transactions, err)
+			http.Error(w, "failed to write transactions response", 500)
 		}
 	} else {
 		w.Header().Set("Allow", "GET")
