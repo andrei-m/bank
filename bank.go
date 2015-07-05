@@ -20,7 +20,11 @@ type Transaction struct {
 }
 
 func NewTransaction(amount int, transactionDate time.Time, note string) *Transaction {
-	return &Transaction{0, amount, &transactionDate, note}
+	return &Transaction{
+		Amount: amount,
+		Date:   &transactionDate,
+		Note:   note,
+	}
 }
 
 // Instantiate and return a reference to a Transaction from the db
