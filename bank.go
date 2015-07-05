@@ -46,6 +46,10 @@ func LoadTransaction(id int) *Transaction {
 	}
 
 	parsedTime, err := time.Parse("2006-01-02", transactionDate)
+	if err != nil {
+		log.Printf("failed to parse date %v: %v", transactionDate, err)
+		return nil
+	}
 	trans := NewTransaction(amount, parsedTime, string(note))
 	trans.ID = id
 	return trans
