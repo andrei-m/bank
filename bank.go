@@ -14,10 +14,10 @@ var database *sql.DB
 const maxNoteLength = 255
 
 type Transaction struct {
-	Id     int
-	Amount int
-	Date   *time.Time
-	Note   string
+	ID     int        `json:"id"`
+	Amount int        `json:"amount"`
+	Date   *time.Time `json:"date"`
+	Note   string     `json:"note"`
 }
 
 //TODO: use encoding/json annotations instead
@@ -54,7 +54,7 @@ func LoadTransaction(id int) *Transaction {
 
 	parsedTime, err := time.Parse("2006-01-02", transactionDate)
 	trans := NewTransaction(amount, parsedTime, string(note))
-	trans.Id = id
+	trans.ID = id
 	return trans
 }
 
@@ -84,7 +84,7 @@ func LoadTransactions() []*Transaction {
 				log.Println("time.Parse(): %v", err)
 			}
 			trans := NewTransaction(amount, parsedTime, string(note))
-			trans.Id = id
+			trans.ID = id
 			result = append(result, trans)
 		}
 	}
@@ -120,13 +120,13 @@ func (t *Transaction) Save() error {
 	}
 
 	// Set the lastId on the Transaction
-	t.Id = int(lastId)
+	t.ID = int(lastId)
 	return nil
 }
 
 // Delete a transaction
 func (t *Transaction) Delete() error {
-	if t.Id == 0 {
+	if t.ID == 0 {
 		return errors.New("bank: cannot delete a transient Transaction")
 	}
 
@@ -136,7 +136,7 @@ func (t *Transaction) Delete() error {
 		return errors.New("bank: error preparing statement for Delete()")
 	}
 
-	_, err = stmt.Exec(t.Id)
+	_, err = stmt.Exec(t.ID)
 	if err != nil {
 		return errors.New("bank: error executing statement for Delete()")
 	}

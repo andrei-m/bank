@@ -35,9 +35,9 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="transaction in transactions | filter:dateFilter">
-                        <td>{{transaction.Date | utcDate: 'yyyy-MM-dd'}}</td>
-                        <td ng-class="{true: 'credit', false: 'debit'}[transaction.Amount >= 0]">{{transaction.Amount | toDecimal | currency}}</td>
-                        <td>{{transaction.Note}}</td>
+                        <td>{{transaction.date | utcDate: 'yyyy-MM-dd'}}</td>
+                        <td ng-class="{true: 'credit', false: 'debit'}[transaction.amount >= 0]">{{transaction.amount | toDecimal | currency}}</td>
+                        <td>{{transaction.note}}</td>
                         <td><a href="#" ng-click="delete(transaction)">Delete</a></td>
                     </tr>
                     <tr class="sum">
@@ -49,11 +49,11 @@
 
         <form ng-controller="transaction">
             <label for="Date">Date:</label>
-            <input id="Date" date-input ng-model="transaction.Date"></input>
+            <input id="Date" date-input ng-model="transaction.date"></input>
             <label for="Amount">Amount:</label>
-            <input id="Amount" type="number" step="0.01" ng-model="transaction.Amount"></input>
+            <input id="Amount" type="number" step="0.01" ng-model="transaction.amount"></input>
             <label for="Note">Note:</label>
-            <input id="Note" ng-model="transaction.Note"></input>
+            <input id="Note" ng-model="transaction.note"></input>
             <button ng-click="save(transaction)">Save</button>
         </form>
     </body>

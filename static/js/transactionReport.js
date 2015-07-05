@@ -14,8 +14,8 @@ app.factory('transReportFactory', function() {
 
             while (dateIterator <= endDate) {
                 while (transactionsIter.length > 0 && this.sameDay(dateIterator, 
-                    new Date(transactionsIter[0].Date))) {
-                    sum += transactionsIter.shift().Amount;
+                    new Date(transactionsIter[0].date))) {
+                    sum += transactionsIter.shift().amount;
                 }
 
                 report.push(sum);

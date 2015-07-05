@@ -18,7 +18,7 @@ app.controller('transactionsList', function($scope, $http, $filter) {
     $scope.startDate.setMonth($scope.startDate.getMonth() - 1);
 
     $scope.dateFilter = function(transaction) {
-        var transDate = new Date(transaction.Date);
+        var transDate = new Date(transaction.date);
         return transDate >= $scope.startDate && transDate <= $scope.endDate;
     };
 
@@ -32,7 +32,7 @@ app.controller('transactionsList', function($scope, $http, $filter) {
 
         var total = 0;
         angular.forEach(filtered, function(trans) {
-            total += trans.Amount;
+            total += trans.amount;
         });
         $scope.total = total;
     };
@@ -56,7 +56,7 @@ app.controller('transactionsList', function($scope, $http, $filter) {
 
     $scope.delete = function(transaction) {
         console.log('DELETE-ing: ' + JSON.stringify(transaction));
-        $http.delete('/transaction/' + transaction.Id).success(function(response) {
+        $http.delete('/transaction/' + transaction.id).success(function(response) {
             console.log('DELETE response: ' + JSON.stringify(response));
             $scope.$emit('reload');
         });
@@ -68,15 +68,15 @@ app.controller('transaction', function($scope, $http, $filter) {
     var resetTransaction = function() {
         $scope.transaction = {};
         var now = new Date();
-        $scope.transaction.Date = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0);
+        $scope.transaction.date = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0);
     };
     resetTransaction();
 
     $scope.save = function(transaction) {
         var newTrans = {
-            'Date': transaction.Date,
-            'Amount': $filter('fromDecimal')(transaction.Amount),
-            'Note': transaction.Note
+            'date': transaction.date,
+            'amount': $filter('fromDecimal')(transaction.amount),
+            'note': transaction.note
         };
 
         console.log("POSTing: " + JSON.stringify(newTrans));
@@ -132,7 +132,7 @@ app.controller('transactionsGraph', function($scope, $filter, transReportFactory
         } else if (args.transactions) {
             $scope.chartConfig.title.text = null;
             var credits = $filter('filter')(args.transactions, function(trans) {
-                return trans.Amount > 0;
+                return trans.amount > 0;
             });
             var creditsReport = transReportFactory.getReport(args.startDate, 
                 args.endDate, 
@@ -140,7 +140,7 @@ app.controller('transactionsGraph', function($scope, $filter, transReportFactory
             $scope.chartConfig.series[0].data = creditsReport.map($filter('toDecimal'));
 
             var debits = $filter('filter')(args.transactions, function(trans) {
-                return trans.Amount < 0;
+                return trans.amount < 0;
             });
             var debitsReport = transReportFactory.getReport(args.startDate, 
                 args.endDate, 
