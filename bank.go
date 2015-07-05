@@ -32,7 +32,7 @@ func LoadTransaction(id int) *Transaction {
 	db := getDB()
 	stmt, err := db.Prepare("SELECT amount, time, note FROM Transaction WHERE id=? AND deletionTime IS NULL")
 	if err != nil {
-		log.Println("db.Prepare(): %v", err)
+		log.Printf("db.Prepare(): %v\n", err)
 		return nil
 	}
 	defer stmt.Close()
@@ -60,7 +60,7 @@ func LoadTransactions() []*Transaction {
 	db := getDB()
 	rows, err := db.Query("SELECT id, amount, time, note FROM Transaction WHERE deletionTime IS NULL ORDER BY time")
 	if err != nil {
-		log.Println("failed to load transactions: %v", err)
+		log.Printf("failed to load transactions: %v\n", err)
 		return nil
 	}
 	defer rows.Close()
@@ -73,12 +73,12 @@ func LoadTransactions() []*Transaction {
 	for rows.Next() {
 		err := rows.Scan(&id, &amount, &transactionDate, &note)
 		if err != nil {
-			log.Println("Scan(): %v", err)
+			log.Printf("Scan(): %v\n", err)
 			return nil
 		} else {
 			parsedTime, err := time.Parse("2006-01-02", transactionDate)
 			if err != nil {
-				log.Println("time.Parse(): %v", err)
+				log.Printf("time.Parse(): %v\n", err)
 			}
 			trans := NewTransaction(amount, parsedTime, string(note))
 			trans.ID = id
@@ -145,7 +145,7 @@ func getDB() *sql.DB {
 	if database == nil {
 		db, err := sql.Open("mysql", "bank:bank@/bank")
 		if err != nil {
-			log.Println("sql.Open(): %v", err)
+			log.Printf("sql.Open(): %v\n", err)
 		}
 		database = db
 	}
