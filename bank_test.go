@@ -7,7 +7,9 @@ import (
 
 func TestSave(t *testing.T) {
 	trans := newTransaction(1, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), "foo")
-	trans.Save()
+	if err := trans.Save(); err != nil {
+		t.Errorf("failed to save transaction: %v", err)
+	}
 	reloaded := loadTransaction(trans.ID)
 
 	if reloaded.ID != trans.ID {

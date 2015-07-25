@@ -35,7 +35,11 @@ func loadTransaction(id int) *transaction {
 		log.Printf("db.Prepare(): %v\n", err)
 		return nil
 	}
-	defer stmt.Close()
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			log.Printf("failed to close statement: %v\n", err)
+		}
+	}()
 
 	var amount int
 	var transactionDate string
@@ -47,7 +51,7 @@ func loadTransaction(id int) *transaction {
 
 	parsedTime, err := time.Parse("2006-01-02", transactionDate)
 	if err != nil {
-		log.Printf("failed to parse date %v: %v", transactionDate, err)
+		log.Printf("failed to parse date %v: %v\n", transactionDate, err)
 		return nil
 	}
 	trans := newTransaction(amount, parsedTime, string(note))
@@ -63,7 +67,11 @@ func loadTransactions() []*transaction {
 		log.Printf("failed to load transactions: %v\n", err)
 		return nil
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("failed to close statement: %v\n", err)
+		}
+	}()
 
 	var id, amount int
 	var transactionDate string
@@ -103,7 +111,11 @@ func (t *transaction) Save() error {
 	if err != nil {
 		return errors.New("bank: error preparing statement for Save()")
 	}
-	defer stmt.Close()
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			log.Printf("failed to close statement: %v\n", err)
+		}
+	}()
 
 	res, err := stmt.Exec(t.Date, t.Amount, t.Note)
 	if err != nil {
