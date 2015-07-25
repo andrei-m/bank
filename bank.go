@@ -3,6 +3,7 @@ package bank
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"time"
@@ -95,21 +96,26 @@ func loadTransactions() []*transaction {
 	return result
 }
 
-//TODO: Save app-specific errors as variables; reuse library errors where possible
+var (
+	errNoTransactionDate = errors.New("cannot save Transaction without a Date")
+	//FIXME: This is in bytes, not chars. This should be changed to be Unicode-compatible
+	errNoteMaxLength        = fmt.Errorf("transaction note cannot exceed %d chars", maxNoteLength)
+	errTransientTransaction = errors.New("cannot delete a transient Transaction")
+)
 
 // Persist a transaction
 func (t *transaction) Save() error {
 	if t.Date == nil {
-		return errors.New("bank: cannot save Transaction without a Date")
+		return errNoTransactionDate
 	}
 	if len(t.Note) > maxNoteLength {
-		return errors.New("bank: transaction note is too long to save")
+		return errNoteMaxLength
 	}
 
 	db := getDB()
 	stmt, err := db.Prepare("INSERT INTO Transaction (time, amount, note) VALUES (?, ?, ?)")
 	if err != nil {
-		return errors.New("bank: error preparing statement for Save()")
+		return err
 	}
 	defer func() {
 		if err := stmt.Close(); err != nil {
@@ -119,12 +125,12 @@ func (t *transaction) Save() error {
 
 	res, err := stmt.Exec(t.Date, t.Amount, t.Note)
 	if err != nil {
-		return errors.New("bank: error executing statement for Save()")
+		return err
 	}
 
 	lastID, err := res.LastInsertId()
 	if err != nil {
-		return errors.New("bank: retrieving last id for Save()")
+		return err
 	}
 
 	// Set the lastId on the Transaction
@@ -135,21 +141,17 @@ func (t *transaction) Save() error {
 // Delete a transaction
 func (t *transaction) Delete() error {
 	if t.ID == 0 {
-		return errors.New("bank: cannot delete a transient Transaction")
+		return errTransientTransaction
 	}
 
 	db := getDB()
 	stmt, err := db.Prepare("UPDATE Transaction SET deletionTime=NOW() where id=?")
 	if err != nil {
-		return errors.New("bank: error preparing statement for Delete()")
+		return err
 	}
 
 	_, err = stmt.Exec(t.ID)
-	if err != nil {
-		return errors.New("bank: error executing statement for Delete()")
-	}
-
-	return nil
+	return err
 }
 
 func getDB() *sql.DB {

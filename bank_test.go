@@ -22,7 +22,7 @@ func TestSaveWithoutDate(t *testing.T) {
 	trans.Date = nil
 	err := trans.Save()
 
-	if err == nil || err.Error() != "bank: cannot save Transaction without a Date" {
+	if err != errNoTransactionDate {
 		t.Errorf("Expected an error on Save() without a Date")
 	}
 }
@@ -35,7 +35,7 @@ func TestSaveWithLongNote(t *testing.T) {
 	trans := newTransaction(99, time.Date(2014, time.May, 23, 0, 0, 0, 0, time.UTC), note)
 	err := trans.Save()
 
-	if err == nil || err.Error() != "bank: transaction note is too long to save" {
+	if err != errNoteMaxLength {
 		t.Errorf("Expected an error on Save() without a long note")
 	}
 }
