@@ -78,9 +78,9 @@ func handleTransactions(w http.ResponseWriter, r *http.Request) {
 }
 
 // SetupHandlers configures routes & handlers for the transaction server
-func SetupHandlers() {
+func SetupHandlers(fs http.FileSystem) {
 	http.HandleFunc("/transaction", handleTransaction)
 	http.HandleFunc("/transaction/", handleTransaction)
 	http.HandleFunc("/transactions", handleTransactions)
-	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static/"))))
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(fs)))
 }
