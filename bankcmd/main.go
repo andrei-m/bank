@@ -14,7 +14,7 @@ import (
 const port = 1337
 
 func main() {
-	bank.SetupHandlers(parcello.Dir("/"))
+	bank.SetupHandlers(parcello.ManagerAt("/"))
 	log.Printf("listening on port %d\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 		log.Fatal(err)
